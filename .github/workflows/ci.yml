@@ -8,7 +8,7 @@ on:
 
 jobs:
   # ──────────────────────────────────────────────────────────────────────────
-  # JOB 1 — Backend: Maven build + Docker build + Trivy scan + GHCR push
+  # JOB 1 — Backend
   # ──────────────────────────────────────────────────────────────────────────
   backend:
     name: Backend
@@ -33,7 +33,7 @@ jobs:
         run: mvn clean package -DskipTests --batch-mode --no-transfer-progress
 
       - name: SonarQube scan (placeholder)
-        run: echo "SonarQube — add SONAR_TOKEN + SONAR_HOST_URL secrets to enable"
+        run: echo "SonarQube placeholder - add SONAR_TOKEN secret to enable"
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
@@ -42,16 +42,21 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set lowercase image name
+        id: image
+        run: echo "name=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')/backend" >> $GITHUB_OUTPUT
+
       - name: Build backend image
         run: |
-          docker build -t ghcr.io/${{ github.repository }}/backend:latest \
-                       -t ghcr.io/${{ github.repository }}/backend:${{ github.sha }} \
-                       ./backend
+          docker build \
+            -t ${{ steps.image.outputs.name }}:latest \
+            -t ${{ steps.image.outputs.name }}:${{ github.sha }} \
+            ./backend
 
       - name: Trivy scan — backend
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ghcr.io/${{ github.repository }}/backend:latest
+          image-ref: ${{ steps.image.outputs.name }}:latest
           format: table
           exit-code: '0'
           severity: HIGH,CRITICAL
@@ -60,11 +65,11 @@ jobs:
       - name: Push backend image
         if: github.event_name == 'push'
         run: |
-          docker push ghcr.io/${{ github.repository }}/backend:latest
-          docker push ghcr.io/${{ github.repository }}/backend:${{ github.sha }}
+          docker push ${{ steps.image.outputs.name }}:latest
+          docker push ${{ steps.image.outputs.name }}:${{ github.sha }}
 
   # ──────────────────────────────────────────────────────────────────────────
-  # JOB 2 — Frontend: npm build + Docker build + Trivy scan + GHCR push
+  # JOB 2 — Frontend
   # ──────────────────────────────────────────────────────────────────────────
   frontend:
     name: Frontend
@@ -93,7 +98,7 @@ jobs:
         run: npm run build
 
       - name: SonarQube scan (placeholder)
-        run: echo "SonarQube — add SONAR_TOKEN + SONAR_HOST_URL secrets to enable"
+        run: echo "SonarQube placeholder - add SONAR_TOKEN secret to enable"
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
@@ -102,16 +107,21 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set lowercase image name
+        id: image
+        run: echo "name=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')/frontend" >> $GITHUB_OUTPUT
+
       - name: Build frontend image
         run: |
-          docker build -t ghcr.io/${{ github.repository }}/frontend:latest \
-                       -t ghcr.io/${{ github.repository }}/frontend:${{ github.sha }} \
-                       ./frontend
+          docker build \
+            -t ${{ steps.image.outputs.name }}:latest \
+            -t ${{ steps.image.outputs.name }}:${{ github.sha }} \
+            ./frontend
 
       - name: Trivy scan — frontend
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ghcr.io/${{ github.repository }}/frontend:latest
+          image-ref: ${{ steps.image.outputs.name }}:latest
           format: table
           exit-code: '0'
           severity: HIGH,CRITICAL
@@ -120,18 +130,17 @@ jobs:
       - name: Push frontend image
         if: github.event_name == 'push'
         run: |
-          docker push ghcr.io/${{ github.repository }}/frontend:latest
-          docker push ghcr.io/${{ github.repository }}/frontend:${{ github.sha }}
+          docker push ${{ steps.image.outputs.name }}:latest
+          docker push ${{ steps.image.outputs.name }}:${{ github.sha }}
 
   # ──────────────────────────────────────────────────────────────────────────
-  # JOB 3 — Deploy to GKE (skipped — add GCP_SA_KEY secret to enable)
+  # JOB 3 — Deploy (disabled until GCP_SA_KEY secret is added)
   # ──────────────────────────────────────────────────────────────────────────
   deploy:
     name: Deploy to GKE
     runs-on: ubuntu-latest
     needs: [backend, frontend]
-    if: false   # Change to: github.event_name == 'push' && github.ref == 'refs/heads/main'
-                # once GCP_SA_KEY secret is configured
+    if: false
 
     steps:
       - name: Checkout
