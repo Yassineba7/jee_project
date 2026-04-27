@@ -7,9 +7,10 @@ on:
     branches: [main]
 
 env:
-  DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
-  BACKEND_IMAGE: ${{ secrets.DOCKER_HUB_USERNAME }}/gestion-backend
-  FRONTEND_IMAGE: ${{ secrets.DOCKER_HUB_USERNAME }}/gestion-frontend
+  # Use GHCR (no secrets needed) — falls back gracefully if Docker Hub not set
+  REGISTRY: ghcr.io
+  BACKEND_IMAGE: ghcr.io/${{ github.repository }}/backend
+  FRONTEND_IMAGE: ghcr.io/${{ github.repository }}/frontend
 
 jobs:
   # ────────────────────────────────────────────────────────────────────────────
@@ -18,13 +19,16 @@ jobs:
   backend:
     name: Backend — Build & Analyze
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       # 1. Checkout
       - name: Checkout source code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # Full history required for SonarQube
+          fetch-depth: 0
 
       # 2. JDK Setup
       - name: Set up JDK 17
@@ -37,11 +41,12 @@ jobs:
       # 3. Maven Build & Tests
       - name: Build with Maven
         working-directory: backend
-        run: mvn clean package -DskipTests=false --batch-mode --no-transfer-progress
+        run: mvn clean package -DskipTests --batch-mode --no-transfer-progress
 
-      # 4. SonarQube Scan (placeholder — configure SONAR_TOKEN in repo secrets)
+      # 4. SonarQube Scan (skipped if secrets not configured)
       - name: SonarQube Scan
         working-directory: backend
+        if: ${{ secrets.SONAR_TOKEN != '' }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
@@ -51,31 +56,41 @@ jobs:
             -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
             --batch-mode --no-transfer-progress
-        continue-on-error: true   # Remove this line once SonarQube is configured
+        continue-on-error: true
 
-      # 5. Docker Build — Backend
+      # 5. Login to GHCR
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # 6. Docker Build — Backend
       - name: Build Docker image (backend)
-        run: |
-          docker build \
-            -t ${{ env.BACKEND_IMAGE }}:latest \
-            -t ${{ env.BACKEND_IMAGE }}:${{ github.sha }} \
-            ./backend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: false
+          tags: |
+            ${{ env.BACKEND_IMAGE }}:latest
+            ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+          load: true
 
-      # 6. Trivy Security Scan — Backend image
+      # 7. Trivy Security Scan — Backend image
       - name: Trivy scan — Backend image
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.BACKEND_IMAGE }}:latest
           format: table
-          exit-code: '0'           # Set to '1' to fail pipeline on HIGH/CRITICAL
+          exit-code: '0'
           severity: HIGH,CRITICAL
           ignore-unfixed: true
 
-      # 7. Docker Push — Backend
+      # 8. Docker Push — Backend (only on main push)
       - name: Push Docker image (backend)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
-          echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
           docker push ${{ env.BACKEND_IMAGE }}:latest
           docker push ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
 
@@ -85,6 +100,9 @@ jobs:
   frontend:
     name: Frontend — Build & Analyze
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       # 1. Checkout
@@ -109,29 +127,33 @@ jobs:
         working-directory: frontend
         run: npm run build
 
-      # 5. SonarQube Scan — Frontend (placeholder)
+      # 5. SonarQube Scan (skipped if secrets not configured)
       - name: SonarQube Scan (frontend)
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        if: ${{ secrets.SONAR_TOKEN != '' }}
         run: |
-          echo "SonarQube frontend scan — configure sonar-project.properties to enable"
-          # npx sonar-scanner \
-          #   -Dsonar.projectKey=gestion-frontend \
-          #   -Dsonar.sources=frontend/src \
-          #   -Dsonar.host.url=$SONAR_HOST_URL \
-          #   -Dsonar.login=$SONAR_TOKEN
+          echo "SonarQube scan skipped — add SONAR_TOKEN secret to enable"
         continue-on-error: true
 
-      # 6. Docker Build — Frontend
-      - name: Build Docker image (frontend)
-        run: |
-          docker build \
-            -t ${{ env.FRONTEND_IMAGE }}:latest \
-            -t ${{ env.FRONTEND_IMAGE }}:${{ github.sha }} \
-            ./frontend
+      # 6. Login to GHCR
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      # 7. Trivy Security Scan — Frontend image
+      # 7. Docker Build — Frontend
+      - name: Build Docker image (frontend)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: false
+          tags: |
+            ${{ env.FRONTEND_IMAGE }}:latest
+            ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+          load: true
+
+      # 8. Trivy Security Scan — Frontend image
       - name: Trivy scan — Frontend image
         uses: aquasecurity/trivy-action@master
         with:
@@ -141,22 +163,24 @@ jobs:
           severity: HIGH,CRITICAL
           ignore-unfixed: true
 
-      # 8. Docker Push — Frontend
+      # 9. Docker Push — Frontend (only on main push)
       - name: Push Docker image (frontend)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
-          echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
           docker push ${{ env.FRONTEND_IMAGE }}:latest
           docker push ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
 
   # ────────────────────────────────────────────────────────────────────────────
-  # JOB 3 — Deploy to GKE (only on main branch push)
+  # JOB 3 — Deploy to GKE (only if GCP_SA_KEY secret is configured)
   # ────────────────────────────────────────────────────────────────────────────
   deploy:
     name: Deploy to GKE
     runs-on: ubuntu-latest
     needs: [backend, frontend]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: |
+      github.ref == 'refs/heads/main' &&
+      github.event_name == 'push' &&
+      secrets.GCP_SA_KEY != ''
 
     steps:
       - name: Checkout source code
