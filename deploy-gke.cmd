@@ -13,11 +13,11 @@ gcloud auth configure-docker --quiet
 
 echo.
 echo [2/6] Build image Backend...
-docker build -t gcr.io/%PROJECT_ID%/backend:latest ./production-backend
+docker build -t gcr.io/%PROJECT_ID%/backend:latest ./backend
 
 echo.
 echo [3/6] Build image Frontend...
-docker build -t gcr.io/%PROJECT_ID%/frontend:latest ./production-frontend
+docker build -t gcr.io/%PROJECT_ID%/frontend:latest ./frontend
 
 echo.
 echo [4/6] Push images sur Google Container Registry...

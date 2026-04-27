@@ -1,0 +1,21 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Spring Boot Backend — Service (LoadBalancer)
+# GKE / cloud providers will assign an external IP automatically
+# ─────────────────────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: gestion-production
+  labels:
+    app: backend
+    tier: api
+spec:
+  type: LoadBalancer
+  selector:
+    app: backend
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80           # External port
+      targetPort: 8080   # Container port

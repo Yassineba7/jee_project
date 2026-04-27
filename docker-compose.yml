@@ -21,7 +21,7 @@ services:
   # ── Backend (Spring Boot) ──────────────────────────────────────────────────
   backend:
     build:
-      context: ./production-backend
+      context: ./backend
       dockerfile: Dockerfile
     container_name: gestion-backend
     restart: unless-stopped
@@ -47,7 +47,7 @@ services:
   # ── Frontend (Angular SSR) ─────────────────────────────────────────────────
   frontend:
     build:
-      context: ./production-frontend
+      context: ./frontend
       dockerfile: Dockerfile
     container_name: gestion-frontend
     restart: unless-stopped
