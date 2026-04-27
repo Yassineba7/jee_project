@@ -3,21 +3,32 @@ kind: Deployment
 metadata:
   name: backend
   namespace: gestion-production
+  labels:
+    app: backend
+    tier: api
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: backend
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   template:
     metadata:
       labels:
         app: backend
+        tier: api
     spec:
       containers:
         - name: backend
-          image: gcr.io/jeeapplication-494610/backend:latest
+          image: ghcr.io/yassineba7/jee_project/backend:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
+              name: http
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "prod"
@@ -31,7 +42,14 @@ spec:
                   name: mysql-secret
                   key: mysql-root-password
             - name: CORS_ALLOWED_ORIGINS
-              value: "http://104.199.58.8,http://frontend:4000"
+              value: "http://frontend:80,http://localhost:4200"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
           readinessProbe:
             httpGet:
               path: /actuator/health
@@ -54,6 +72,8 @@ metadata:
 spec:
   selector:
     app: backend
+  type: ClusterIP
   ports:
     - port: 8080
       targetPort: 8080
+      name: http

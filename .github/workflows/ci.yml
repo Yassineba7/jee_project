@@ -21,19 +21,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: maven
-
-      - name: Maven build
-        working-directory: backend
-        run: mvn clean package -DskipTests --batch-mode --no-transfer-progress
-
-      - name: SonarQube scan (placeholder)
-        run: echo "SonarQube placeholder - add SONAR_TOKEN secret to enable"
+      - name: Set lowercase image name
+        id: image
+        run: |
+          echo "backend=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')/backend" >> $GITHUB_OUTPUT
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
@@ -42,21 +33,25 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set lowercase image name
-        id: image
-        run: echo "name=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')/backend" >> $GITHUB_OUTPUT
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Build backend image
-        run: |
-          docker build \
-            -t ${{ steps.image.outputs.name }}:latest \
-            -t ${{ steps.image.outputs.name }}:${{ github.sha }} \
-            ./backend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          push: false
+          load: true
+          tags: |
+            ${{ steps.image.outputs.backend }}:latest
+            ${{ steps.image.outputs.backend }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Trivy scan — backend
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ steps.image.outputs.name }}:latest
+          image-ref: ${{ steps.image.outputs.backend }}:latest
           format: table
           exit-code: '0'
           severity: HIGH,CRITICAL
@@ -64,9 +59,15 @@ jobs:
 
       - name: Push backend image
         if: github.event_name == 'push'
-        run: |
-          docker push ${{ steps.image.outputs.name }}:latest
-          docker push ${{ steps.image.outputs.name }}:${{ github.sha }}
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            ${{ steps.image.outputs.backend }}:latest
+            ${{ steps.image.outputs.backend }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   # ──────────────────────────────────────────────────────────────────────────
   # JOB 2 — Frontend
@@ -82,23 +83,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Node 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Install dependencies
-        working-directory: frontend
-        run: npm ci --legacy-peer-deps
-
-      - name: Angular build
-        working-directory: frontend
-        run: npm run build
-
-      - name: SonarQube scan (placeholder)
-        run: echo "SonarQube placeholder - add SONAR_TOKEN secret to enable"
+      - name: Set lowercase image name
+        id: image
+        run: |
+          echo "frontend=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')/frontend" >> $GITHUB_OUTPUT
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
@@ -107,21 +95,25 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set lowercase image name
-        id: image
-        run: echo "name=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')/frontend" >> $GITHUB_OUTPUT
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Build frontend image
-        run: |
-          docker build \
-            -t ${{ steps.image.outputs.name }}:latest \
-            -t ${{ steps.image.outputs.name }}:${{ github.sha }} \
-            ./frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          push: false
+          load: true
+          tags: |
+            ${{ steps.image.outputs.frontend }}:latest
+            ${{ steps.image.outputs.frontend }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Trivy scan — frontend
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ steps.image.outputs.name }}:latest
+          image-ref: ${{ steps.image.outputs.frontend }}:latest
           format: table
           exit-code: '0'
           severity: HIGH,CRITICAL
@@ -129,9 +121,15 @@ jobs:
 
       - name: Push frontend image
         if: github.event_name == 'push'
-        run: |
-          docker push ${{ steps.image.outputs.name }}:latest
-          docker push ${{ steps.image.outputs.name }}:${{ github.sha }}
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          push: true
+          tags: |
+            ${{ steps.image.outputs.frontend }}:latest
+            ${{ steps.image.outputs.frontend }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   # ──────────────────────────────────────────────────────────────────────────
   # JOB 3 — Deploy (disabled until GCP_SA_KEY secret is added)
@@ -165,8 +163,7 @@ jobs:
           kubectl apply -f k8s/namespace.yml
           kubectl apply -f k8s/secrets.yml
           kubectl apply -f k8s/mysql-deployment.yml
-          kubectl apply -f k8s/deployment.yaml
-          kubectl apply -f k8s/service.yaml
+          kubectl apply -f k8s/backend-deployment.yml
           kubectl apply -f k8s/frontend-deployment.yml
           kubectl rollout restart deployment/backend -n gestion-production
           kubectl rollout restart deployment/frontend -n gestion-production
