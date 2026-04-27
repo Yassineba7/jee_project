@@ -1,0 +1,207 @@
+#!/bin/bash
+
+# Production Management System - File Structure
+# This document provides the complete file tree
+
+production-frontend/
+│
+├── src/
+│   ├── app/
+│   │   ├── core/
+│   │   │   ├── models/
+│   │   │   │   ├── produit.model.ts                    ✓ Created
+│   │   │   │   ├── machine.model.ts                    ✓ Created
+│   │   │   │   ├── technicien.model.ts                 ✓ Created
+│   │   │   │   ├── maintenance.model.ts                ✓ Created
+│   │   │   │   └── ordre-fabrication.model.ts          ✓ Created
+│   │   │   │
+│   │   │   └── services/
+│   │   │       ├── produit.service.ts                  ✓ Created
+│   │   │       ├── machine.service.ts                  ✓ Created
+│   │   │       ├── technicien.service.ts               ✓ Created
+│   │   │       ├── maintenance.service.ts              ✓ Created
+│   │   │       └── ordre-fabrication.service.ts        ✓ Created
+│   │   │
+│   │   ├── shared/
+│   │   │   └── material.module.ts                       ✓ Created
+│   │   │
+│   │   ├── layout/
+│   │   │   ├── layout.component.ts                      ✓ Created
+│   │   │   └── dashboard.component.ts                   ✓ Created
+│   │   │
+│   │   ├── features/
+│   │   │   ├── produits/
+│   │   │   │   ├── produit-list.component.ts            ✓ Created
+│   │   │   │   └── produit-form.component.ts            ✓ Created
+│   │   │   │
+│   │   │   ├── machines/
+│   │   │   │   ├── machine-list.component.ts            ✓ Created
+│   │   │   │   └── machine-form.component.ts            ✓ Created
+│   │   │   │
+│   │   │   ├── techniciens/
+│   │   │   │   ├── technicien-list.component.ts         ✓ Created
+│   │   │   │   └── technicien-form.component.ts         ✓ Created
+│   │   │   │
+│   │   │   ├── maintenances/
+│   │   │   │   ├── maintenance-list.component.ts        ✓ Created
+│   │   │   │   └── maintenance-form.component.ts        ✓ Created
+│   │   │   │
+│   │   │   └── ordres-fabrication/
+│   │   │       ├── ordre-fabrication-list.component.ts  ✓ Created
+│   │   │       └── ordre-fabrication-form.component.ts  ✓ Created
+│   │   │
+│   │   ├── app.config.ts                                ✓ Updated (HttpClient, Routing)
+│   │   ├── app.routes.ts                                ✓ Created (Complete routing)
+│   │   ├── app.ts                                       ✓ Updated (OnPush)
+│   │   ├── app.html                                     ✓ Updated
+│   │   ├── app.scss                                     (Empty - Global styles)
+│   │   └── app.spec.ts                                  (Existing - Test file)
+│   │
+│   ├── environments/
+│   │   └── environment.ts                               ✓ Created
+│   │
+│   ├── styles.scss                                      (Existing - Global styles)
+│   ├── main.ts                                          (Existing)
+│   ├── main.server.ts                                   (Existing)
+│   ├── server.ts                                        (Existing)
+│   └── index.html                                       (Existing)
+│
+├── angular.json                                         (Configuration)
+├── tsconfig.json                                        (TypeScript config)
+├── tsconfig.app.json                                    (App TypeScript config)
+├── tsconfig.spec.json                                   (Test TypeScript config)
+├── package.json                                         (Dependencies)
+├── package-lock.json                                    (Dependency lock)
+│
+├── SETUP-GUIDE.md                                       ✓ Created
+├── FRONTEND-STRUCTURE.md                                ✓ Created
+├── FILE-STRUCTURE.txt                                   ✓ This file
+│
+├── public/                                              (Static assets)
+└── dist/                                                (Build output)
+
+---
+
+## Files Created: 26 New Component/Service/Model Files
+
+### Models (5 files)
+- produit.model.ts
+- machine.model.ts
+- technicien.model.ts
+- maintenance.model.ts
+- ordre-fabrication.model.ts
+
+### Services (5 files)
+- produit.service.ts
+- machine.service.ts
+- technicien.service.ts
+- maintenance.service.ts
+- ordre-fabrication.service.ts
+
+### Components (14 files)
+Layout:
+- layout.component.ts
+- dashboard.component.ts
+
+Features (2 files per entity × 5 entities):
+- produit-list.component.ts, produit-form.component.ts
+- machine-list.component.ts, machine-form.component.ts
+- technicien-list.component.ts, technicien-form.component.ts
+- maintenance-list.component.ts, maintenance-form.component.ts
+- ordre-fabrication-list.component.ts, ordre-fabrication-form.component.ts
+
+### Shared (1 file)
+- material.module.ts
+
+### Configuration & Environment (2 files)
+- environment.ts
+- app.routes.ts (Updated)
+
+### Documentation (3 files)
+- SETUP-GUIDE.md (Complete setup guide)
+- FRONTEND-STRUCTURE.md (Architecture documentation)
+- FILE-STRUCTURE.txt (This file)
+
+---
+
+## Total Lines of Code
+
+Approximate LOC by file type:
+- Models: ~50 lines (5 files × 10 lines avg)
+- Services: ~150 lines (5 files × 30 lines avg)
+- Components (List): ~150 lines (5 files × 30 lines avg)
+- Components (Form): ~150 lines (5 files × 30 lines avg)
+- Layout: ~200 lines (2 files × 100 lines avg)
+- Material Module: ~40 lines
+- Routes: ~30 lines
+- Config: ~15 lines
+
+**Total: ~785 lines of production code**
+
+---
+
+## Imported Packages Used
+
+From @angular:
+- @angular/core
+- @angular/common
+- @angular/forms (ReactiveFormsModule)
+- @angular/router
+- @angular/platform-browser
+- @angular/http (HttpClientModule)
+- @angular/material/* (13 Material modules)
+- @angular/cdk
+
+From rxjs:
+- of, Observable, Subject
+
+---
+
+## Key Design Patterns Used
+
+1. **Standalone Components** - All components are standalone (no NgModule)
+2. **OnPush Change Detection** - Improved performance
+3. **Reactive Forms** - Type-safe form handling
+4. **Signals** - Angular's new state management
+5. **Dependency Injection** - Using inject() function
+6. **Service Pattern** - Centralized API communication
+7. **Smart/Presentational Split** - Separation of concerns
+8. **Dialog Pattern** - Forms in modals
+9. **Observable Pattern** - Async data handling
+
+---
+
+## Build and Runtime
+
+### Build Artifacts
+- Browser bundle: 876.62 kB (initial)
+- Server bundle: 1.31 MB + additional chunks
+- Output: dist/production-frontend/
+
+### Runtime Requirements
+- Node.js 18+
+- npm 8+
+- Modern browser (Chrome, Firefox, Safari, Edge)
+- Spring Boot API at http://localhost:8080
+
+### Development Server
+- URL: http://localhost:4200
+- Watch mode: Enabled
+- Rebuild time: ~3-5 seconds
+
+---
+
+## Next Steps
+
+1. ✅ Verify application loads at http://localhost:4200
+2. ✅ Connect Spring Boot API (configure CORS)
+3. ⏳ Test CRUD operations for each entity
+4. ⏳ Add additional features as needed
+5. ⏳ Customize styling/branding
+6. ⏳ Set up authentication/authorization
+7. ⏳ Deploy to production
+
+---
+
+For detailed instructions, see: SETUP-GUIDE.md
+For architecture details, see: FRONTEND-STRUCTURE.md

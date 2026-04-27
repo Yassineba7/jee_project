@@ -1,0 +1,592 @@
+// Include theming for Angular Material with `mat.theme()`.
+// This Sass mixin will define CSS variables that are used for styling Angular Material
+// components according to the Material 3 design spec.
+// Learn more about theming and how to use it for your application's
+// custom components at https://material.angular.dev/guide/theming
+@use '@angular/material' as mat;
+
+// Custom color palettes
+$deep-purple-palette: (
+  50: #f3e5f5,
+  100: #e1bee7,
+  200: #ce93d8,
+  300: #ba68c8,
+  400: #ab47bc,
+  500: #9c27b0,
+  600: #8e24aa,
+  700: #7b1fa2,
+  800: #6a1b9a,
+  900: #4a148c,
+  A100: #ea80fc,
+  A200: #e040fb,
+  A400: #d500f9,
+  A700: #aa00ff,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: rgba(black, 0.87),
+    400: rgba(black, 0.87),
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+    A100: rgba(black, 0.87),
+    A200: white,
+    A400: white,
+    A700: white,
+  )
+);
+
+$amber-palette: (
+  50: #fff8e1,
+  100: #ffecb3,
+  200: #ffe082,
+  300: #ffd54f,
+  400: #ffca28,
+  500: #ffb300,
+  600: #ffa000,
+  700: #ff8f00,
+  800: #ff6f00,
+  900: #e65100,
+  A100: #ffe57f,
+  A200: #ffd740,
+  A400: #ffc400,
+  A700: #ffab00,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: rgba(black, 0.87),
+    400: rgba(black, 0.87),
+    500: rgba(black, 0.87),
+    600: rgba(black, 0.87),
+    700: rgba(black, 0.87),
+    800: rgba(black, 0.87),
+    900: white,
+    A100: rgba(black, 0.87),
+    A200: rgba(black, 0.87),
+    A400: rgba(black, 0.87),
+    A700: rgba(black, 0.87),
+  )
+);
+
+html {
+  height: 100%;
+  @include mat.theme(
+    (
+      color: (
+        primary: $deep-purple-palette,
+        accent: $amber-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    )
+  );
+}
+
+body {
+  // Default the application to a light color theme. This can be changed to
+  // `dark` to enable the dark color theme, or to `light dark` to defer to the
+  // user's system settings.
+  color-scheme: light;
+
+  // Set a default background, font and text colors for the application using
+  // Angular Material's system-level CSS variables. Learn more about these
+  // variables at https://material.angular.dev/guide/system-variables
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+
+  // Reset the user agent margin.
+  margin: 0;
+  height: 100%;
+  font-family: 'Roboto', sans-serif;
+}
+
+// Global styles
+* {
+  box-sizing: border-box;
+}
+
+// Custom scrollbar
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+// Smooth transitions - only on specific elements, not * (performance)
+.mat-mdc-card,
+.nav-item,
+.activity-item,
+.stat-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.2s ease;
+}
+
+// Card hover effects
+.mat-mdc-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.mat-mdc-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+// Button hover effects
+.mat-mdc-button,
+.mat-mdc-icon-button,
+.mat-mdc-fab {
+  transition: all 0.2s ease;
+}
+
+.mat-mdc-button:hover,
+.mat-mdc-icon-button:hover,
+.mat-mdc-fab:hover {
+  transform: translateY(-1px);
+}
+
+// Table row hover effects
+.mat-mdc-table .mat-mdc-row:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+// Form field focus effects
+.mat-mdc-form-field.mat-focused .mat-mdc-form-field-outline {
+  color: #512DA8 !important;
+}
+
+// Loading spinner
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+// Empty state
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+
+  .empty-icon {
+    font-size: 64px;
+    color: #ccc;
+    margin-bottom: 16px;
+  }
+
+  .empty-title {
+    font-size: 24px;
+    margin-bottom: 8px;
+    color: #333;
+  }
+
+  .empty-subtitle {
+    font-size: 16px;
+    margin-bottom: 24px;
+  }
+}
+
+// Status chips
+.status-chip {
+  &.en-cours {
+    background-color: #4caf50;
+    color: white;
+  }
+
+  &.termine {
+    background-color: #2196f3;
+    color: white;
+  }
+
+  &.en-attente {
+    background-color: #ff9800;
+    color: white;
+  }
+
+  &.annule {
+    background-color: #f44336;
+    color: white;
+  }
+
+  &.operationnel {
+    background-color: #4caf50;
+    color: white;
+  }
+
+  &.maintenance {
+    background-color: #ff9800;
+    color: white;
+  }
+
+  &.hors-service {
+    background-color: #f44336;
+    color: white;
+  }
+}
+
+// Page header
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  padding: 24px 0;
+
+  .page-title {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 500;
+    color: #333;
+  }
+
+  .page-subtitle {
+    margin: 4px 0 0 0;
+    font-size: 16px;
+    color: #666;
+    font-weight: 400;
+  }
+
+  .add-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+// Gradient backgrounds
+.gradient-primary {
+  background: linear-gradient(135deg, #512DA8 0%, #7B1FA2 100%);
+}
+
+.gradient-accent {
+  background: linear-gradient(135deg, #FFB300 0%, #FF8F00 100%);
+}
+
+.gradient-welcome {
+  background: linear-gradient(135deg, #512DA8 0%, #7B1FA2 50%, #FFB300 100%);
+}
+
+// Sidebar styles
+.sidebar-dark {
+  background: #1E1E2E;
+  color: white;
+
+  .sidebar-header {
+    padding: 24px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+
+    .app-logo {
+      font-size: 24px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: #FFB300;
+    }
+
+    .app-subtitle {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+  }
+
+  .nav-item {
+    margin: 4px 8px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    &.active {
+      background-color: rgba(255, 179, 0, 0.2);
+      border-left: 4px solid #FFB300;
+
+      .nav-icon {
+        color: #FFB300;
+      }
+
+      .nav-text {
+        color: #FFB300;
+        font-weight: 500;
+      }
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      text-decoration: none;
+      color: inherit;
+      width: 100%;
+
+      .nav-icon {
+        margin-right: 12px;
+        font-size: 20px;
+        color: rgba(255, 255, 255, 0.7);
+      }
+
+      .nav-text {
+        font-size: 14px;
+        font-weight: 400;
+      }
+    }
+  }
+}
+
+// Content area
+.content-light {
+  background-color: #F5F5F5;
+  min-height: calc(100vh - 64px);
+}
+
+// Toolbar gradient
+.toolbar-gradient {
+  background: linear-gradient(135deg, #512DA8 0%, #7B1FA2 100%);
+  color: white;
+
+  .breadcrumb {
+    font-size: 14px;
+    opacity: 0.9;
+  }
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+  }
+}
+
+// Stat cards with colored borders
+.stat-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, #512DA8, #FFB300);
+  }
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  }
+
+  .stat-icon {
+    font-size: 32px;
+    margin-bottom: 8px;
+    opacity: 0.8;
+  }
+
+  .stat-value {
+    font-size: 36px;
+    font-weight: 700;
+    margin: 8px 0;
+    background: linear-gradient(135deg, #512DA8, #7B1FA2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .stat-label {
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+// Welcome banner
+.welcome-banner {
+  background: linear-gradient(135deg, #512DA8 0%, #7B1FA2 50%, #FFB300 100%);
+  color: white;
+  padding: 40px 32px;
+  border-radius: 16px;
+  margin-bottom: 32px;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .welcome-title {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .welcome-subtitle {
+    font-size: 18px;
+    opacity: 0.9;
+    position: relative;
+    z-index: 1;
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+  50% { transform: translate(-50%, -50%) rotate(180deg); }
+}
+
+// Recent activity section
+.recent-activity {
+  .activity-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+
+    .activity-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #333;
+      margin: 0;
+    }
+
+    .view-all-btn {
+      color: #512DA8;
+      font-weight: 500;
+    }
+  }
+
+  .activity-item {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    background: white;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.2s ease;
+
+    &:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+      transform: translateY(-1px);
+    }
+
+    .activity-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 16px;
+      font-size: 18px;
+    }
+
+    .activity-content {
+      flex: 1;
+
+      .activity-text {
+        font-size: 14px;
+        color: #333;
+        margin-bottom: 4px;
+      }
+
+      .activity-time {
+        font-size: 12px;
+        color: #666;
+      }
+    }
+  }
+}
+
+// Form improvements
+.form-section {
+  margin-bottom: 24px;
+
+  .section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #512DA8;
+  }
+}
+
+.mat-mdc-form-field {
+  margin-bottom: 16px;
+
+  &.mat-form-field-invalid .mat-mdc-form-field-outline {
+    color: #f44336;
+  }
+}
+
+.form-error {
+  color: #f44336;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+// Dialog improvements
+.mat-mdc-dialog-container {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.mat-mdc-dialog-content {
+  padding: 24px;
+}
+
+.mat-mdc-dialog-actions {
+  padding: 16px 24px 24px;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+// Action buttons
+.action-buttons {
+  display: flex;
+  gap: 8px;
+
+  .edit-btn {
+    color: #2196f3;
+  }
+
+  .delete-btn {
+    color: #f44336;
+  }
+}
