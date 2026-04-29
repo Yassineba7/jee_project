@@ -115,7 +115,7 @@ jobs:
         with:
           image-ref: ${{ steps.image.outputs.frontend }}:latest
           format: table
-          exit-code: '0'
+          exit-code: '1'
           severity: HIGH,CRITICAL
           ignore-unfixed: true
 
